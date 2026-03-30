@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Don't be a pussy",
+  title: "Locked In",
   description: "Fat loss tracker",
 };
 
