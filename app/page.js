@@ -291,6 +291,7 @@ export default function Page() {
   }, [startWeight, firstTrackedDate, todayKey, targetWeeklyRate]);
 
   const deltaVsPlan = latestWeight != null && roadmapTarget != null ? +(latestWeight - roadmapTarget).toFixed(1) : null;
+
   const plateau = useMemo(() => {
     if (weightEntries.length < 4) return false;
     const recent = weightEntries.slice(-7);
@@ -339,7 +340,21 @@ export default function Page() {
 
   const chartPolyline = chartPoints.map((p) => `${p.x},${90 - p.y}`).join(' ');
 
+  const hour = new Date().getHours();
+  const yesterdayMissed = !history.find((h) => h.date === addDays(todayKey, -1))?.allDone;
+
+  const rewards = [
+    '🔥 Perfect execution',
+    '💪 You handled business',
+    '⚡ That’s how it’s done',
+    '🧠 Discipline wins',
+  ];
+
+  const reward = rewards[Math.floor(Math.random() * rewards.length)];
+
   const coachText = useMemo(() => {
+    if (deltaVsPlan != null && deltaVsPlan > 2) return "You're slipping. Tighten everything up now.";
+    if (deltaVsPlan != null && deltaVsPlan > 1) return 'Slightly off. Fix it today.';
     if (energy === 'low') return 'Energy is low. Fix sodium first. Stop looking for excuses.';
     if (strength === 'down') return 'Strength is down. Tighten up protein or add a little fuel around training.';
     if (plateau) return 'You are stalled. Reduce added fat slightly and tighten execution this week.';
@@ -347,7 +362,7 @@ export default function Page() {
     if (weeklyRate !== '--' && Number(weeklyRate) > 4) return 'Loss is very fast. Add a little fat so you do not burn out.';
     if (completed < total) return 'Not done yet. Finish the checklist before you call today a win.';
     return 'Stick to the plan. No whining. No random changes.';
-  }, [energy, strength, plateau, weeklyRate, targetWeeklyRate, completed, total]);
+  }, [deltaVsPlan, energy, strength, plateau, weeklyRate, targetWeeklyRate, completed, total]);
 
   const dailyMission = `Hit all ${total} checklist items, stay near ${numericProteinTarget}g protein, and execute your ${pace} pace.`;
 
@@ -362,6 +377,10 @@ export default function Page() {
           <button style={styles.smallButton} onClick={requestNotifications}>
             {notificationsEnabled ? 'Notifications On' : 'Enable Notifications'}
           </button>
+        </div>
+
+        <div style={styles.winBox}>
+          Win the day = complete every item.
         </div>
 
         <div style={styles.card}>
@@ -433,14 +452,55 @@ export default function Page() {
             <div style={styles.progressWrap}><div style={styles.progressBar(completionPct)} /></div>
             <div style={styles.statusBox}>
               {!weight && 'Enter your weight and face the truth.'}
-              {weight && completed === total && '🔥 Locked in. Perfect execution.'}
+              {weight && completed === total && reward}
               {weight && completed < total && '⚠️ Not finished. Execute the plan.'}
             </div>
             <div style={styles.inlineStatusRow}>
               <span style={styles.badge}>Status: {status}</span>
               <span style={styles.badge}>To Goal: {numericWeight != null ? (numericWeight - numericGoalWeight).toFixed(1) : '--'} lbs</span>
             </div>
+
             {plateau && <div style={styles.warnText}>⚠️ Plateau detected. Tighten up this week.</div>}
+
+            {completed >= total - 2 && completed < total && (
+              <div style={styles.nearText}>⚠️ You’re close. Finish strong.</div>
+            )}
+
+            {hour >= 20 && completed < total && (
+              <div style={styles.lastChanceText}>
+                🚨 Last chance. Finish today or lose the streak.
+              </div>
+            )}
+
+            {currentStreak >= 3 && (
+              <div style={styles.identityText}>
+                You are a {currentStreak}-day operator.
+              </div>
+            )}
+
+            {yesterdayMissed && (
+              <div style={styles.warnText}>
+                ⚠️ You missed yesterday. Do NOT miss twice.
+              </div>
+            )}
+
+            {xp % 50 > 35 && (
+              <div style={styles.levelText}>
+                ⚡ Almost level {level + 1}
+              </div>
+            )}
+
+            {latestWeight && (
+              <div style={styles.tinyNote}>
+                Every decision moves this number.
+              </div>
+            )}
+
+            {completed < total && (
+              <div style={styles.tinyMuted}>
+                You know what needs to be done.
+              </div>
+            )}
           </div>
         </div>
 
@@ -567,6 +627,13 @@ const styles = {
     boxShadow: '0 0 10px #ff00ff',
     borderRadius: '12px',
     background: 'rgba(0,0,0,0.5)',
+  },
+  winBox: {
+    padding: '10px',
+    border: '1px solid #00ffff',
+    marginBottom: '10px',
+    borderRadius: '10px',
+    background: 'rgba(0,255,255,0.06)',
   },
   grid2: {
     display: 'grid',
@@ -726,6 +793,34 @@ const styles = {
   warnText: {
     color: '#ffaa00',
     marginTop: '8px',
+  },
+  nearText: {
+    color: '#ff9900',
+    fontWeight: 'bold',
+    marginTop: '10px',
+  },
+  lastChanceText: {
+    color: '#ff0000',
+    fontWeight: 'bold',
+    textShadow: '0 0 10px #ff0000',
+    marginTop: '10px',
+  },
+  identityText: {
+    marginTop: '8px',
+    color: '#00ffff',
+  },
+  levelText: {
+    color: '#ffaa00',
+    marginTop: '8px',
+  },
+  tinyNote: {
+    marginTop: '10px',
+    color: '#aaa',
+  },
+  tinyMuted: {
+    marginTop: '10px',
+    fontSize: '12px',
+    color: '#666',
   },
   breakBox: {
     marginTop: '10px',
