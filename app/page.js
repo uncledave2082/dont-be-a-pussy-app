@@ -1,12 +1,6 @@
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { CalendarDays, Flame, Target, Dumbbell, Fish, Coffee, Egg, Beef, Droplets, Bell, TrendingDown, Brain, Trophy } from 'lucide-react';
+
+import { useEffect, useMemo, useState } from 'react';
 
 const defaultChecklist = {
   coffee: false,
@@ -89,8 +83,161 @@ function prettyDate(dateString) {
   });
 }
 
-export default function FatLossSystemApp() {
+const styles = {
+  page: {
+    minHeight: '100vh',
+    background: '#f8fafc',
+    padding: '16px',
+    fontFamily: 'Arial, sans-serif',
+    color: '#0f172a',
+  },
+  container: {
+    maxWidth: '1100px',
+    margin: '0 auto',
+  },
+  title: {
+    fontSize: '32px',
+    fontWeight: 800,
+    marginBottom: '8px',
+  },
+  subtitle: {
+    fontSize: '14px',
+    color: '#475569',
+    marginBottom: '20px',
+  },
+  grid: {
+    display: 'grid',
+    gap: '16px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+  },
+  card: {
+    background: '#ffffff',
+    border: '1px solid #e2e8f0',
+    borderRadius: '16px',
+    padding: '16px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+  },
+  cardTitle: {
+    fontSize: '18px',
+    fontWeight: 700,
+    marginBottom: '12px',
+  },
+  label: {
+    display: 'block',
+    fontSize: '13px',
+    marginBottom: '6px',
+    fontWeight: 600,
+  },
+  input: {
+    width: '100%',
+    padding: '10px 12px',
+    borderRadius: '10px',
+    border: '1px solid #cbd5e1',
+    marginBottom: '12px',
+    boxSizing: 'border-box',
+  },
+  buttonRow: {
+    display: 'flex',
+    gap: '10px',
+    flexWrap: 'wrap',
+  },
+  button: {
+    padding: '10px 14px',
+    borderRadius: '12px',
+    border: 'none',
+    background: '#0f172a',
+    color: '#fff',
+    cursor: 'pointer',
+    fontWeight: 700,
+  },
+  buttonSecondary: {
+    padding: '10px 14px',
+    borderRadius: '12px',
+    border: '1px solid #cbd5e1',
+    background: '#fff',
+    color: '#0f172a',
+    cursor: 'pointer',
+    fontWeight: 700,
+  },
+  stat: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginBottom: '10px',
+    fontSize: '14px',
+  },
+  badge: {
+    background: '#e2e8f0',
+    borderRadius: '999px',
+    padding: '4px 10px',
+    fontWeight: 700,
+    fontSize: '12px',
+  },
+  progressWrap: {
+    background: '#e2e8f0',
+    borderRadius: '999px',
+    overflow: 'hidden',
+    height: '12px',
+    marginTop: '8px',
+  },
+  progressBar: (progress) => ({
+    width: `${progress}%`,
+    height: '100%',
+    background: '#0f172a',
+  }),
+  checklistRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '12px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '12px',
+    marginBottom: '10px',
+    background: '#fff',
+  },
+  small: {
+    fontSize: '13px',
+    color: '#475569',
+  },
+  statusBox: {
+    background: '#f1f5f9',
+    borderRadius: '12px',
+    padding: '12px',
+    fontWeight: 700,
+    textAlign: 'center',
+  },
+  noteBox: {
+    width: '100%',
+    minHeight: '90px',
+    padding: '12px',
+    borderRadius: '12px',
+    border: '1px solid #cbd5e1',
+    boxSizing: 'border-box',
+  },
+  milestoneGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))',
+    gap: '10px',
+  },
+  milestone: (hit) => ({
+    border: '1px solid #cbd5e1',
+    borderRadius: '12px',
+    padding: '14px',
+    textAlign: 'center',
+    background: hit ? '#0f172a' : '#fff',
+    color: hit ? '#fff' : '#0f172a',
+    fontWeight: 700,
+  }),
+  savedDay: {
+    border: '1px solid #e2e8f0',
+    borderRadius: '12px',
+    padding: '12px',
+    background: '#fff',
+  },
+};
+
+export default function Page() {
   const todayKey = getTodayKey();
+
   const [startDate, setStartDate] = useState(() => localStorage.getItem('fls-start-date') || todayKey);
   const [weight, setWeight] = useState(() => localStorage.getItem(`fls-weight-${todayKey}`) || '');
   const [checklist, setChecklist] = useState(() => {
@@ -104,7 +251,6 @@ export default function FatLossSystemApp() {
   const [energy, setEnergy] = useState(() => localStorage.getItem(`fls-energy-${todayKey}`) || 'good');
   const [strength, setStrength] = useState(() => localStorage.getItem(`fls-strength-${todayKey}`) || 'stable');
   const [notes, setNotes] = useState(() => localStorage.getItem(`fls-notes-${todayKey}`) || '');
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('fls-start-date', startDate);
@@ -134,15 +280,8 @@ export default function FatLossSystemApp() {
     localStorage.setItem('fls-history', JSON.stringify(history));
   }, [history]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      setNotificationsEnabled(Notification.permission === 'granted');
-    }
-  }, []);
-
   const totalItems = Object.keys(checklist).length;
   const completed = Object.values(checklist).filter(Boolean).length;
-  const score = completed;
   const progress = Math.round((completed / totalItems) * 100);
   const allDone = completed === totalItems;
 
@@ -221,22 +360,11 @@ export default function FatLossSystemApp() {
     return 'Stick to the plan. No whining. No random changes.';
   }, [energy, strength, weeklyRate]);
 
-  const requestNotifications = async () => {
-    if (typeof window === 'undefined' || !('Notification' in window)) return;
-    const result = await Notification.requestPermission();
-    setNotificationsEnabled(result === 'granted');
-    if (result === 'granted') {
-      new Notification('Reminders enabled', {
-        body: 'Use your phone calendar or alarms for scheduled meal reminders.',
-      });
-    }
-  };
-
   const saveDay = () => {
     const entry = {
       date: todayKey,
       weight: numericWeight,
-      score,
+      score: completed,
       allDone,
       progress,
       energy,
@@ -247,7 +375,9 @@ export default function FatLossSystemApp() {
     setHistory([...withoutToday, entry]);
   };
 
-  const toggle = (key) => setChecklist((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggle = (key) => {
+    setChecklist((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const resetToday = () => {
     setChecklist(defaultChecklist);
@@ -257,259 +387,176 @@ export default function FatLossSystemApp() {
     setNotes('');
   };
 
-  const formulaText = 'Score = completed boxes / 8. Perfect day = 8/8. To Goal = current weight - 185. Weekly rate = average daily loss x 7. Status compares current weight to projected roadmap by week.';
-
   const items = [
-    { key: 'coffee', label: '8 AM Coffee', icon: Coffee },
-    { key: 'eggs', label: '10 AM Eggs', icon: Egg },
-    { key: 'electrolytes1', label: 'Midday Electrolytes', icon: Droplets },
-    { key: 'steakLunch', label: '2 PM Sirloin', icon: Beef },
-    { key: 'steakDinner', label: 'Dinner Sirloin', icon: Beef },
-    { key: 'electrolytes2', label: 'Evening Electrolytes', icon: Droplets },
-    { key: 'mackerel', label: '8 PM Mackerel', icon: Fish },
-    { key: 'workout', label: 'Workout', icon: Dumbbell },
+    { key: 'coffee', label: '8 AM Coffee' },
+    { key: 'eggs', label: '10 AM Eggs' },
+    { key: 'electrolytes1', label: 'Midday Electrolytes' },
+    { key: 'steakLunch', label: '2 PM Sirloin' },
+    { key: 'steakDinner', label: 'Dinner Sirloin' },
+    { key: 'electrolytes2', label: 'Evening Electrolytes' },
+    { key: 'mackerel', label: '8 PM Mackerel' },
+    { key: 'workout', label: 'Workout' },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <div className="grid gap-4 lg:grid-cols-4">
-          <Card className="rounded-2xl shadow-sm lg:col-span-3">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
-                <Target className="h-6 w-6" /> Don’t be a pussy
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-4">
-                <div>
-                  <div className="mb-2 text-sm font-medium">Start date</div>
-                  <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                </div>
-                <div>
-                  <div className="mb-2 text-sm font-medium">Today’s weight</div>
-                  <Input type="number" placeholder="255" value={weight} onChange={(e) => setWeight(e.target.value)} />
-                </div>
-                <div>
-                  <div className="mb-2 text-sm font-medium">Energy</div>
-                  <select className="w-full rounded-xl border bg-white p-2 text-sm" value={energy} onChange={(e) => setEnergy(e.target.value)}>
-                    <option value="great">Great</option>
-                    <option value="good">Good</option>
-                    <option value="low">Low</option>
-                  </select>
-                </div>
-                <div>
-                  <div className="mb-2 text-sm font-medium">Strength</div>
-                  <select className="w-full rounded-xl border bg-white p-2 text-sm" value={strength} onChange={(e) => setStrength(e.target.value)}>
-                    <option value="up">Up</option>
-                    <option value="stable">Stable</option>
-                    <option value="down">Down</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid gap-4 md:grid-cols-3">
-                <Button onClick={saveDay} className="rounded-2xl">Save today</Button>
-                <Button variant="outline" onClick={requestNotifications} className="rounded-2xl">
-                  <Bell className="mr-2 h-4 w-4" /> {notificationsEnabled ? 'Notifications enabled' : 'Enable notifications'}
-                </Button>
-                <Button variant="outline" onClick={resetToday} className="rounded-2xl">Reset today</Button>
-              </div>
-              <div>
-                <div className="mb-2 flex items-center justify-between text-sm">
-                  <span>Daily completion</span>
-                  <span>{progress}%</span>
-                </div>
-                <Progress value={progress} className="h-3" />
-              </div>
-            </CardContent>
-          </Card>
+    <main style={styles.page}>
+      <div style={styles.container}>
+        <div style={styles.title}>Don’t be a pussy</div>
+        <div style={styles.subtitle}>Aggressive fat loss tracker and daily accountability app.</div>
 
-          <Card className="rounded-2xl shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Flame className="h-5 w-5" /> Live status
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div className="flex items-center justify-between">
-                <span>Score</span>
-                <Badge>{score}/8</Badge>
+        <div style={{ ...styles.grid, marginBottom: '16px' }}>
+          <div style={styles.card}>
+            <div style={styles.cardTitle}>Daily setup</div>
+
+            <label style={styles.label}>Start date</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              style={styles.input}
+            />
+
+            <label style={styles.label}>Today’s weight</label>
+            <input
+              type="number"
+              placeholder="255"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              style={styles.input}
+            />
+
+            <label style={styles.label}>Energy</label>
+            <select value={energy} onChange={(e) => setEnergy(e.target.value)} style={styles.input}>
+              <option value="great">Great</option>
+              <option value="good">Good</option>
+              <option value="low">Low</option>
+            </select>
+
+            <label style={styles.label}>Strength</label>
+            <select value={strength} onChange={(e) => setStrength(e.target.value)} style={styles.input}>
+              <option value="up">Up</option>
+              <option value="stable">Stable</option>
+              <option value="down">Down</option>
+            </select>
+
+            <div style={styles.buttonRow}>
+              <button style={styles.button} onClick={saveDay}>Save today</button>
+              <button style={styles.buttonSecondary} onClick={resetToday}>Reset today</button>
+            </div>
+
+            <div style={{ marginTop: '16px' }}>
+              <div style={styles.small}>Daily completion: {progress}%</div>
+              <div style={styles.progressWrap}>
+                <div style={styles.progressBar(progress)} />
               </div>
-              <div className="flex items-center justify-between">
-                <span>Streak</span>
-                <Badge variant="secondary">{streak} days</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>To 185</span>
-                <Badge variant="outline">{toGoal} lbs</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Next milestone</span>
-                <Badge variant="outline">{nextMilestone}</Badge>
-              </div>
-              <div className="rounded-2xl bg-slate-100 p-3 text-center font-medium">{smartStatus}</div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+
+          <div style={styles.card}>
+            <div style={styles.cardTitle}>Live status</div>
+            <div style={styles.stat}><span>Score</span><span style={styles.badge}>{completed}/8</span></div>
+            <div style={styles.stat}><span>Streak</span><span style={styles.badge}>{streak} days</span></div>
+            <div style={styles.stat}><span>To 185</span><span style={styles.badge}>{toGoal} lbs</span></div>
+            <div style={styles.stat}><span>Next milestone</span><span style={styles.badge}>{nextMilestone}</span></div>
+            <div style={styles.statusBox}>{smartStatus}</div>
+          </div>
+
+          <div style={styles.card}>
+            <div style={styles.cardTitle}>Prediction engine</div>
+            <div style={styles.stat}><span>Weekly rate</span><strong>{weeklyRate != null ? `${weeklyRate} lbs` : '--'}</strong></div>
+            <div style={styles.stat}><span>Total lost</span><strong>{totalLost != null ? `${totalLost} lbs` : '--'}</strong></div>
+            <div style={styles.stat}><span>Week goal</span><strong>{currentGoal}</strong></div>
+            <div style={styles.stat}><span>Vs plan</span><strong>{deltaVsPlan}</strong></div>
+            <div style={{ ...styles.statusBox, marginTop: '12px' }}>
+              Projected 185 date: {projectedGoalDate ? prettyDate(projectedGoalDate) : '--'}
+            </div>
+            <div style={{ marginTop: '12px' }} className="small">
+              Last 7+ day change: <strong>{weeklyChange != null ? `${weeklyChange} lbs` : '--'}</strong>
+            </div>
+          </div>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-3">
-          <Card className="rounded-2xl shadow-sm xl:col-span-1">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <CalendarDays className="h-5 w-5" /> Daily checklist
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3">
-                {items.map(({ key, label, icon: Icon }) => (
-                  <label key={key} className="flex items-center justify-between rounded-2xl border bg-white p-4">
-                    <div className="flex items-center gap-3">
-                      <Icon className="h-5 w-5 text-slate-500" />
-                      <span className="font-medium">{label}</span>
-                    </div>
-                    <Checkbox checked={checklist[key]} onCheckedChange={() => toggle(key)} />
-                  </label>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-2xl shadow-sm xl:col-span-1">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <TrendingDown className="h-5 w-5" /> Prediction engine
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border p-3">
-                  <div className="text-slate-500">Weekly rate</div>
-                  <div className="text-xl font-semibold">{weeklyRate != null ? `${weeklyRate} lbs` : '--'}</div>
-                </div>
-                <div className="rounded-2xl border p-3">
-                  <div className="text-slate-500">Total lost</div>
-                  <div className="text-xl font-semibold">{totalLost != null ? `${totalLost} lbs` : '--'}</div>
-                </div>
-                <div className="rounded-2xl border p-3">
-                  <div className="text-slate-500">Week goal</div>
-                  <div className="text-xl font-semibold">{currentGoal}</div>
-                </div>
-                <div className="rounded-2xl border p-3">
-                  <div className="text-slate-500">Vs plan</div>
-                  <div className="text-xl font-semibold">{deltaVsPlan}</div>
-                </div>
-              </div>
-              <div className="rounded-2xl bg-slate-100 p-4">
-                <div className="font-medium">Projected 185 date</div>
-                <div className="mt-1 text-lg font-semibold">{projectedGoalDate ? prettyDate(projectedGoalDate) : '--'}</div>
-              </div>
-              <div className="rounded-2xl border p-4">
-                <div className="font-medium">Last 7+ day change</div>
-                <div className="mt-1 text-lg font-semibold">{weeklyChange != null ? `${weeklyChange} lbs` : '--'}</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-2xl shadow-sm xl:col-span-1">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Brain className="h-5 w-5" /> Coach brain
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <div className="rounded-2xl bg-slate-100 p-4 font-medium">{coachAdvice}</div>
-              <div>
-                <div className="mb-2 font-medium">Today’s notes</div>
-                <textarea
-                  className="min-h-28 w-full rounded-2xl border p-3 text-sm"
-                  placeholder="Energy, cravings, workout notes..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+        <div style={{ ...styles.grid, marginBottom: '16px' }}>
+          <div style={styles.card}>
+            <div style={styles.cardTitle}>Daily checklist</div>
+            {items.map((item) => (
+              <div key={item.key} style={styles.checklistRow}>
+                <span>{item.label}</span>
+                <input
+                  type="checkbox"
+                  checked={checklist[item.key]}
+                  onChange={() => toggle(item.key)}
                 />
               </div>
-              <div>
-                <div className="mb-2 font-medium">Core rules</div>
-                <div className="space-y-2 text-slate-700">
-                  <div>Energy low → sodium first.</div>
-                  <div>Weight stalls 5–7 days → reduce added fat slightly.</div>
-                  <div>Strength down → increase protein or fat slightly.</div>
-                  <div>Loss too fast after week 2 → add a little fat.</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            ))}
+          </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="rounded-2xl shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Trophy className="h-5 w-5" /> Target roadmap
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-                {milestones.map((m) => {
-                  const current = numericWeight ?? latestWeight ?? 255;
-                  const hit = current <= m;
-                  return (
-                    <div key={m} className={`rounded-2xl border p-4 text-center ${hit ? 'bg-slate-900 text-white' : 'bg-white'}`}>
-                      <div className="text-sm">Milestone</div>
-                      <div className="text-2xl font-bold">{m}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+          <div style={styles.card}>
+            <div style={styles.cardTitle}>Coach brain</div>
+            <div style={styles.statusBox}>{coachAdvice}</div>
 
-          <Card className="rounded-2xl shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-lg">Formula</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <div className="rounded-2xl bg-slate-100 p-4 font-mono text-xs leading-6">
-                {formulaText}
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {targetWeights.map((t) => (
-                  <div key={t.week} className="rounded-xl border p-2">
-                    Week {t.week}: <strong>{t.weight}</strong>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="rounded-2xl shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg">Saved days</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              {history.length === 0 ? (
-                <div className="text-sm text-slate-500">No saved days yet. Enter your weight and save the day.</div>
-              ) : (
-                [...history]
-                  .sort((a, b) => b.date.localeCompare(a.date))
-                  .slice(0, 12)
-                  .map((entry) => (
-                    <div key={entry.date} className="rounded-2xl border p-4 text-sm">
-                      <div className="font-semibold">{entry.date}</div>
-                      <div>Weight: {entry.weight ?? '--'}</div>
-                      <div>Score: {entry.score}/8</div>
-                      <div>Completion: {entry.progress}%</div>
-                      <div>Energy: {entry.energy ?? '--'}</div>
-                      <div>Strength: {entry.strength ?? '--'}</div>
-                      <div>{entry.allDone ? '🔥 No soft days' : '⚠️ Tighten it up'}</div>
-                    </div>
-                  ))
-              )}
+            <div style={{ marginTop: '14px' }}>
+              <label style={styles.label}>Today’s notes</label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Energy, cravings, workout notes..."
+                style={styles.noteBox}
+              />
             </div>
-          </CardContent>
-        </Card>
+
+            <div style={{ marginTop: '14px' }}>
+              <div style={styles.label}>Core rules</div>
+              <div style={styles.small}>Energy low → sodium first.</div>
+              <div style={styles.small}>Weight stalls 5–7 days → reduce added fat slightly.</div>
+              <div style={styles.small}>Strength down → increase protein or fat slightly.</div>
+              <div style={styles.small}>Loss too fast after week 2 → add a little fat.</div>
+            </div>
+          </div>
+
+          <div style={styles.card}>
+            <div style={styles.cardTitle}>Target roadmap</div>
+            <div style={styles.milestoneGrid}>
+              {milestones.map((m) => {
+                const current = numericWeight ?? latestWeight ?? 255;
+                const hit = current <= m;
+                return (
+                  <div key={m} style={styles.milestone(hit)}>
+                    <div style={{ fontSize: '12px' }}>Milestone</div>
+                    <div style={{ fontSize: '24px' }}>{m}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div style={styles.card}>
+          <div style={styles.cardTitle}>Saved days</div>
+          <div style={styles.grid}>
+            {history.length === 0 ? (
+              <div style={styles.small}>No saved days yet. Enter your weight and save the day.</div>
+            ) : (
+              [...history]
+                .sort((a, b) => b.date.localeCompare(a.date))
+                .slice(0, 12)
+                .map((entry) => (
+                  <div key={entry.date} style={styles.savedDay}>
+                    <div style={{ fontWeight: 700, marginBottom: '8px' }}>{entry.date}</div>
+                    <div style={styles.small}>Weight: {entry.weight ?? '--'}</div>
+                    <div style={styles.small}>Score: {entry.score}/8</div>
+                    <div style={styles.small}>Completion: {entry.progress}%</div>
+                    <div style={styles.small}>Energy: {entry.energy ?? '--'}</div>
+                    <div style={styles.small}>Strength: {entry.strength ?? '--'}</div>
+                    <div style={{ marginTop: '8px', fontWeight: 700 }}>
+                      {entry.allDone ? '🔥 No soft days' : '⚠️ Tighten it up'}
+                    </div>
+                  </div>
+                ))
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
