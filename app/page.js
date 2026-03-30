@@ -356,7 +356,7 @@ export default function Page() {
       <div style={styles.container}>
         <div style={styles.headerRow}>
           <div>
-            <h1 style={styles.title}>Don’t be a pussy</h1>
+            <h1 style={styles.title}>Locked In</h1>
             <div style={styles.subTitle}>Execute. No excuses.</div>
           </div>
           <button style={styles.smallButton} onClick={requestNotifications}>
